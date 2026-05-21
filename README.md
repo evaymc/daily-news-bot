@@ -166,7 +166,6 @@ RSS News → Deduplication → Gemini AI → Summarization → Telegram
 daily-news-bot/
 ├── main.py                    # Main script
 ├── requirements.txt           # Dependencies
-├── .env                       # Local config (not committed)
 ├── .gitignore
 └── .github/
     └── workflows/
