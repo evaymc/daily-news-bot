@@ -26,7 +26,7 @@
 | The Verge | https://www.theverge.com/rss/index.xml |
 | TechCrunch | https://techcrunch.com/feed/ |
 | TLDR | https://tldr.tech/rss |
-| TradingView | 由 Gemini Google Search 補充 |
+| TradingView | [由 Gemini Google Search 補充](https://www.tradingview.com/) |
 
 ---
 
