@@ -1,69 +1,91 @@
-# 📰 AI 每日新聞日報 Bot
+# 📰 AI Daily News Bot
 
-每日自動抓取財經、科技、全球時事 RSS，交由 Gemini 3.5 Flash 整理成廣東話摘要，並推送到 Telegram 頻道。
+A simple automation tool that:
 
----
+👉 Collects the latest news 👉 Summarizes it using AI 👉 Sends it directly to Telegram every day
 
-## ✨ 功能
-
-- 從 4 個 RSS 來源抓取最新文章（每源最多 20 條）
-- 自動去除重複文章
-- 呼叫 Gemini 3.5 Flash + Google Search 生成每日摘要
-  - 財經 Top 5
-  - 科技 Top 3
-  - 全球時事 Top 2
-- 全文以**香港廣東話書面語 + 繁體中文**撰寫
-- 自動分段發送至 Telegram（每段上限 4000 字）
-- 每日 HKT 09:00 由 GitHub Actions 自動執行
+It runs fully automatically — no need to open your computer daily.
 
 ---
 
-## 📡 RSS 來源
+## ✨ What it does
 
-| 來源 | URL |
-|------|-----|
+- 📡 Fetches news from 4 RSS sources
+- 🧠 Uses Google Gemini (Free API) to summarize news
+- 🗣️ Outputs summaries in Cantonese (Hong Kong) / Traditional Chinese
+- 📊 Organizes news into:
+  - Finance Top 5
+  - Tech Top 3
+  - Global News Top 2
+- 🚫 Removes duplicate articles automatically
+- 📩 Sends results to Telegram channel or group
+- ⏰ Runs automatically every day using GitHub Actions
+
+---
+
+## 💡 Why use this?
+
+Instead of:
+
+❌ Checking multiple news sites
+❌ Spending time filtering important news
+❌ Switching between apps
+
+You only need:
+
+✅ Open Telegram
+✅ Read one clean AI-generated summary
+
+---
+
+## ⚙️ Tech Stack
+
+- Python
+- RSS feeds (news sources)
+- Gemini API (free AI summarization)
+- GitHub Actions (automation scheduler)
+- Telegram Bot (message delivery)
+
+---
+
+## 📡 News Sources
+
+| Source | URL |
+|--------|-----|
 | Yahoo Finance | https://finance.yahoo.com/rss/topstories |
 | The Verge | https://www.theverge.com/rss/index.xml |
 | TechCrunch | https://techcrunch.com/feed/ |
-| TLDR | https://tldr.tech/rss |
-| TradingView | [由 Gemini Google Search 補充](https://www.tradingview.com/) |
+| TLDR Newsletter | https://tldr.tech/rss |
+| TradingView | Supplemented via Gemini Google Search |
 
 ---
 
-## 🗂️ 檔案結構
+## 🚀 Quick Start
 
-```
-news-bot/
-├── main.py                          # 主程式
-├── requirements.txt                 # Python 依賴
-├── .env                             # 本地環境變數（不 commit）
-├── .gitignore
-└── .github/
-    └── workflows/
-        └── daily_news.yml           # GitHub Actions 排程
+### 1. Clone the project
+
+```bash
+git clone https://github.com/your-username/daily-news-bot.git
+cd daily-news-bot
 ```
 
----
-
-## 🚀 本地執行
-
-### 1. 安裝依賴
+### 2. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. 設定環境變數
+### 3. Set environment variables
 
-複製 `.env` 並填入你的 API Key：
+Create a `.env` file:
 
 ```env
-GEMINI_API_KEY=your_key_here
-TG_BOT_TOKEN=your_token_here
-TG_CHAT_ID=your_chat_id_here
+GEMINI_API_KEY=your_free_gemini_api_key
+TG_BOT_TOKEN=your_telegram_bot_token
+TG_CHAT_ID=your_chat_id
 ```
 
-### 3. 執行
+### 4. Run locally
 
 ```bash
 python main.py
@@ -71,35 +93,91 @@ python main.py
 
 ---
 
-## ⚙️ GitHub Actions 自動排程
+## 🔑 How to get API keys
 
-### 設定 Secrets
+### 🤖 Gemini API (Free)
 
-前往 repo → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**，新增以下三個：
+1. Go to https://aistudio.google.com/apikey
+2. Sign in with your Google account
+3. Click **Create API key**
+4. Free tier is enough for daily news summarization
 
-| Secret 名稱 | 取得方式 |
-|---|---|
-| `GEMINI_API_KEY` | [Google AI Studio](https://aistudio.google.com) → Get API key |
-| `TG_BOT_TOKEN` | Telegram 搜尋 `@BotFather` → `/newbot` |
-| `TG_CHAT_ID` | 頻道用 `@username`，群組用數字 ID（可用 `@userinfobot` 查詢）|
+> Free tier limits: 5 RPM / 20 RPD / 250,000 tokens per day
+> No credit card required.
 
-### 手動觸發
+### 📩 Telegram Bot
 
-**Actions** → **Daily News Digest** → **Run workflow**
-
-### 排程時間
-
-每日 UTC 01:00（= HKT 09:00）自動執行。
-
-> ⚠️ **注意**：GitHub 對閒置 repo 有限制，若 60 日內無任何 commit，scheduled workflow 會被暫停。收到通知後到 Actions 頁面點 **Enable workflow** 重新啟用即可。
+1. Search `@BotFather` on Telegram
+2. Run `/newbot`
+3. Follow the instructions to get your bot token
+4. Create a channel or group and add your bot
+5. Get your Chat ID via `@userinfobot`
 
 ---
 
-## 🛠️ 技術棧
+## ⏰ Automation (GitHub Actions)
 
-- **Python 3.11**
-- [google-genai](https://pypi.org/project/google-genai/) — Gemini API SDK
-- [feedparser](https://pypi.org/project/feedparser/) — RSS 解析
-- [requests](https://pypi.org/project/requests/) — HTTP 請求
-- [python-dotenv](https://pypi.org/project/python-dotenv/) — 環境變數管理
-- **GitHub Actions** — 自動排程
+Runs automatically every day at **09:00 HKT** (UTC 01:00).
+
+### Setup Secrets (one-time)
+
+Go to: **GitHub repo → Settings → Secrets and variables → Actions → New repository secret**
+
+Add the following:
+
+| Secret | Description |
+|--------|-------------|
+| `GEMINI_API_KEY` | Your Gemini API key |
+| `TG_BOT_TOKEN` | Your Telegram bot token |
+| `TG_CHAT_ID` | Your Telegram channel or group ID |
+
+### Manual trigger
+
+**Actions → Daily News Digest → Run workflow**
+
+> ⚠️ **Note:** GitHub pauses scheduled workflows after 60 days of repo inactivity. If paused, go to Actions and click **Enable workflow**.
+
+---
+
+## 💰 Cost
+
+This project runs completely free:
+
+| Item | Cost |
+|------|------|
+| Gemini API (free tier) | $0 |
+| GitHub Actions | $0 |
+| Telegram Bot | $0 |
+| **Total** | **$0 / month** |
+
+---
+
+## 🧠 System Flow
+
+```
+RSS News → Deduplication → Gemini AI → Summarization → Telegram
+```
+
+---
+
+## 📁 Project Structure
+
+```
+daily-news-bot/
+├── main.py                    # Main script
+├── requirements.txt           # Dependencies
+├── .env                       # Local config (not committed)
+├── .gitignore
+└── .github/
+    └── workflows/
+        └── daily_news.yml     # GitHub Actions scheduler
+```
+
+---
+
+## 🌱 Who is this for?
+
+- Beginners learning automation projects
+- People learning GitHub Actions
+- Anyone building Telegram bots
+- Portfolio / CV projects for software roles
