@@ -3,7 +3,8 @@ import feedparser
 import requests
 from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 load_dotenv()
 
@@ -20,13 +21,22 @@ RSS_FEEDS = {
 
 MAX_ITEMS_PER_FEED = 20
 
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+}
+
 
 def fetch_rss() -> str:
     seen_titles: set[str] = set()
     lines: list[str] = []
 
     for source, url in RSS_FEEDS.items():
-        feed = feedparser.parse(url)
+        try:
+            r = requests.get(url, headers=HEADERS, timeout=10)
+            feed = feedparser.parse(r.content)
+        except Exception as e:
+            print(f"[WARNING] Failed to fetch {source}: {e}")
+            continue
         count = 0
         for entry in feed.entries:
             if count >= MAX_ITEMS_PER_FEED:
@@ -112,12 +122,14 @@ TradingView 冇 RSS，請用 Google Search 搜尋「TradingView news site:tradin
 
 
 def call_gemini(prompt: str) -> str:
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel(
-        model_name="gemini-2.5-flash",
-        tools=[{"google_search": {}}],
+    client = genai.Client()
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            tools=[types.Tool(google_search=types.GoogleSearch())]
+        ),
     )
-    response = model.generate_content(prompt)
     return response.text
 
 
@@ -144,7 +156,7 @@ def main() -> None:
     rss_content = fetch_rss()
     print(f"Fetched {rss_content.count(chr(10)) + 1} articles")
 
-    print("Calling Gemini 2.5 Flash...")
+    print("Calling Gemini-2.5-flash...")
     prompt = build_prompt(rss_content, date_str)
     digest = call_gemini(prompt)
 
