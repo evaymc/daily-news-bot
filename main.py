@@ -139,8 +139,9 @@ def call_gemini(prompt: str) -> str:
             return response.text
         except Exception as e:
             status = getattr(e, "status_code", None)
+            error_text = str(e).upper()
             is_retryable = status in GEMINI_RETRYABLE_STATUS or (
-                status is None and "503" in str(e)
+                status is None and "503" in error_text and "UNAVAILABLE" in error_text
             )
             if not is_retryable or attempt == GEMINI_MAX_RETRIES:
                 raise
