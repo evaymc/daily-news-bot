@@ -1,4 +1,5 @@
 import os
+import time
 import feedparser
 import requests
 from datetime import datetime, timezone, timedelta
@@ -20,6 +21,9 @@ RSS_FEEDS = {
 }
 
 MAX_ITEMS_PER_FEED = 20
+GEMINI_MAX_RETRIES = 3
+GEMINI_RETRYABLE_STATUS = (429, 500, 502, 503, 504)
+GEMINI_RETRY_SLEEP_SECONDS = 5
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -123,14 +127,29 @@ TradingView 冇 RSS，請用 Google Search 搜尋「TradingView news site:tradin
 
 def call_gemini(prompt: str) -> str:
     client = genai.Client()
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            tools=[types.Tool(google_search=types.GoogleSearch())]
-        ),
-    )
-    return response.text
+    for attempt in range(1, GEMINI_MAX_RETRIES + 1):
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    tools=[types.Tool(google_search=types.GoogleSearch())]
+                ),
+            )
+            return response.text
+        except Exception as e:
+            status = getattr(e, "status_code", None)
+            is_retryable = status in GEMINI_RETRYABLE_STATUS or (
+                status is None and "503" in str(e)
+            )
+            if not is_retryable or attempt == GEMINI_MAX_RETRIES:
+                raise
+            wait_seconds = GEMINI_RETRY_SLEEP_SECONDS * attempt
+            print(
+                f"[WARNING] Gemini call failed with retryable error: {e}. "
+                f"Retrying in {wait_seconds}s ({attempt}/{GEMINI_MAX_RETRIES})..."
+            )
+            time.sleep(wait_seconds)
 
 
 def send_telegram(text: str) -> None:
