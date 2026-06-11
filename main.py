@@ -144,7 +144,7 @@ def call_gemini(prompt: str) -> str:
             )
             if not is_retryable or attempt == GEMINI_MAX_RETRIES:
                 raise
-            wait_seconds = GEMINI_RETRY_SLEEP_SECONDS * attempt
+            wait_seconds = GEMINI_RETRY_SLEEP_SECONDS * (2 ** (attempt - 1))
             print(
                 f"[WARNING] Gemini call failed with retryable error: {e}. "
                 f"Retrying in {wait_seconds}s ({attempt}/{GEMINI_MAX_RETRIES})..."
